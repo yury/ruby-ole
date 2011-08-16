@@ -61,22 +61,25 @@ module Ole # :nodoc:
 			SIZE = 8
 
 			# DateTime.new is slow... faster version for FileTime
-			def self.new year, month, day, hour=0, min=0, sec=0, usec=0
-				# DateTime will remove leap and leap-leap seconds
-				sec = 59 if sec > 59
-				if month <= 2
-					month += 12
-					year  -= 1
-				end
-				y   = year + 4800
-				m   = month - 3
-				jd  = day + (153 * m + 2).div(5) + 365 * y + y.div(4) - y.div(100) + y.div(400) - 32045
-				fr  = hour / 24.0 + min / 1440.0 + sec / 86400.0
-				# new! was actually new0 in older versions of ruby (<=1.8.4?)
-				# see issue #4.
-				msg = respond_to?(:new!) ? :new! : :new0
-				send msg, jd + fr - 0.5, 0, ITALY
-			end
+			
+			# We don't need this speedup in ruby 1.9.3
+			
+      # def self.new year, month, day, hour=0, min=0, sec=0, usec=0
+      #   # DateTime will remove leap and leap-leap seconds
+      #   sec = 59 if sec > 59
+      #   if month <= 2
+      #     month += 12
+      #     year  -= 1
+      #   end
+      #   y   = year + 4800
+      #   m   = month - 3
+      #   jd  = day + (153 * m + 2).div(5) + 365 * y + y.div(4) - y.div(100) + y.div(400) - 32045
+      #   fr  = hour / 24.0 + min / 1440.0 + sec / 86400.0
+      #   # new! was actually new0 in older versions of ruby (<=1.8.4?)
+      #   # see issue #4.
+      #   msg = respond_to?(:new!) ? :new! : :new0
+      #   send msg, jd + fr - 0.5, 0, ITALY
+      # end
 
 			def self.from_time time
 				new(*(time.to_a[0, 6].reverse + [time.usec]))
